@@ -30,6 +30,7 @@ export const useImageUploader = () => {
   });
   const [isDragging, setIsDragging] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [anonymousUpscaleCount, setAnonymousUpscaleCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const maxUploadLimit = user ? 10 : 5;
@@ -69,9 +70,18 @@ export const useImageUploader = () => {
     const image = state.images.find(img => img.id === imageId);
     if (!image) return;
 
-    if (user && !user.isPremium && (user.credits || 0) < 1) {
-      setShowPremiumModal(true);
-      return;
+    
+    if (user && !user.isPremium) {
+      // Check if a non-premium user has enough credits for a single upscale
+      if ((user.credits || 0) < 1) {
+        setShowPremiumModal(true);
+        return;
+      }
+    } else {
+      if (anonymousUpscaleCount >= 5) {
+        setState(prev => ({ ...prev, error: 'You have used your 5 free upscales. Please sign in to continue.' }));
+        return;
+      }
     }
 
     setState(prev => ({
@@ -81,11 +91,13 @@ export const useImageUploader = () => {
     }));
 
     try {
-      const result = await upscaleImage(image.preview, scale, user!.id);
+      const result = await upscaleImage(image.preview, scale, user?.id);
       if (result.success && result.url) {
         if (user && !user.isPremium) {
           const newCredits = Math.max(0, (user.credits || 0) - 1);
           await supabase.from('profiles').update({ credits: newCredits }).eq('id', user.id);
+        } else if (!user) {
+          setAnonymousUpscaleCount(prev => prev + 1);
         }
         setState(prev => ({
           ...prev,
@@ -119,9 +131,12 @@ export const useImageUploader = () => {
 
   const handleUpscaleAll = useCallback(async (scale: number = 2) => {
     const imagesToUpscale = state.images.filter(img => !img.upscaledUrl && !img.isLoading);
-    if (user && !user.isPremium && (user.credits || 0) < imagesToUpscale.length) {
-      setShowPremiumModal(true);
-      return;
+    if (user && !user.isPremium) {
+      // Check if a non-premium user has enough credits for a batch upscale
+      if ((user.credits || 0) < imagesToUpscale.length) {
+        setShowPremiumModal(true);
+        return;
+      }
     }
     for (const image of imagesToUpscale) {
       await handleUpscale(image.id, scale);

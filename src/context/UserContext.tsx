@@ -32,7 +32,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
           .select('*')
           .eq('id', session.user.id)
           .single();
-        setUser({ ...session.user, ...profile });
+        const userProfile = profile ? { ...profile, credits: profile.credits ?? 10 } : { credits: 10 };
+        setUser({ ...session.user, ...userProfile });
       }
     };
     getSession();
@@ -45,7 +46,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
             .select('*')
             .eq('id', session.user.id)
             .single();
-          setUser({ ...session.user, ...profile });
+          const userProfile = profile ? { ...profile, credits: profile.credits ?? 10 } : { credits: 10 };
+          setUser({ ...session.user, ...userProfile });
         };
         getProfile();
       } else {

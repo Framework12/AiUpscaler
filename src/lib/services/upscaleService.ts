@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabaseClient';
 export async function upscaleImage(
   imageUrl: string,
   scale: number = 2,
-  userId: string
+  userId?: string
 ): Promise<UpscaleResponse> {
   try {
     console.log('Upscaling image with scale:', scale);
@@ -61,12 +61,14 @@ export async function upscaleImage(
 
     console.log('Upscale successful, URL:', data.url.substring(0, 50) + '...');
 
-    await supabase.from('images').insert([{
-      user_id: userId,
-      original_url: imageUrl,
-      upscaled_url: data.url,
-      scale: scale,
-    }]);
+    if (userId) {
+      await supabase.from('images').insert([{
+        user_id: userId,
+        original_url: imageUrl,
+        upscaled_url: data.url,
+        scale: scale,
+      }]);
+    }
 
     return {
       success: true,
