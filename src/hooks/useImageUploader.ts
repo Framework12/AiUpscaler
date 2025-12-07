@@ -34,9 +34,18 @@ export const useImageUploader = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const maxUploadLimit = user ? 10 : 5;
+  const MAX_FILE_SIZE_MB = 3;
+  const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
   const handleFilesSelect = useCallback((files: File[]) => {
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    const imageFiles = files.filter(file => {
+      if (!file.type.startsWith('image/')) return false;
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        setState(prev => ({ ...prev, error: `Image "${file.name}" is too large. Please upload files smaller than ${MAX_FILE_SIZE_MB}MB.` }));
+        return false;
+      }
+      return true;
+    });
     if (imageFiles.length === 0) {
       setState(prev => ({ ...prev, error: 'Please select valid image files' }));
       return;
