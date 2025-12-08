@@ -62,6 +62,8 @@ export default function SignUp() {
     }
 
     try {
+      console.log('Starting signup process...');
+      
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -73,11 +75,29 @@ export default function SignUp() {
         },
       });
 
-      if (error) throw error;
+      console.log('Signup response:', { data, error });
 
+      if (error) {
+        console.error('Signup error:', error);
+        throw error;
+      }
+
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        console.log('Email confirmation required');
+        setError('Please check your email to confirm your account before signing in.');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Signup successful, redirecting...');
+      
+      // Wait a moment for the profile to be created by the trigger
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       router.push('/');
     } catch (error) {
+      console.error('Signup error:', error);
       setError((error as Error).message);
     } finally {
       setIsLoading(false);

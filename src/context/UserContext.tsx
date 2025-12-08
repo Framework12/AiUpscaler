@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface User {
   id: string;
@@ -15,48 +16,145 @@ interface User {
 
 interface UserContextType {
   user: User | null;
-  logout: () => void;
+  loading: boolean;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  useEffect(() => {
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-        const userProfile = profile ? { ...profile, credits: profile.credits ?? 10 } : { credits: 10 };
-        setUser({ ...session.user, ...userProfile });
-      }
-    };
-    getSession();
+  const fetchUserProfile = async (authUser: SupabaseUser) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        const getProfile = async () => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-          const userProfile = profile ? { ...profile, credits: profile.credits ?? 10 } : { credits: 10 };
-          setUser({ ...session.user, ...userProfile });
+      if (error) {
+        console.error('Error fetching profile:', error);
+        console.error('Error details:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+        });
+        
+        // Return a default user object if profile doesn't exist yet
+        return {
+          id: authUser.id,
+          email: authUser.email,
+          firstName: authUser.user_metadata?.first_name || '',
+          lastName: authUser.user_metadata?.last_name || '',
+          credits: 10,
+          isPremium: false,
+          totalUpscales: 0,
         };
-        getProfile();
+      }
+
+      return {
+        id: authUser.id,
+        email: authUser.email,
+        firstName: profile?.first_name,
+        lastName: profile?.last_name,
+        credits: profile?.credits ?? 10,
+        isPremium: profile?.is_premium ?? false,
+        totalUpscales: profile?.total_upscales ?? 0,
+      };
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      
+      // Return a default user object on error
+      return {
+        id: authUser.id,
+        email: authUser.email,
+        firstName: authUser.user_metadata?.first_name || '',
+        lastName: authUser.user_metadata?.last_name || '',
+        credits: 10,
+        isPremium: false,
+        totalUpscales: 0,
+      };
+    }
+  };
+
+  const refreshUser = async () => {
+    try {
+      console.log('refreshUser: Starting...');
+      const { data: { user: authUser }, error } = await supabase.auth.getUser();
+      
+      if (error) {
+        console.error('refreshUser: Error getting user:', error);
+        setUser(null);
+        return;
+      }
+      
+      if (authUser) {
+        console.log('refreshUser: Auth user found, fetching profile...');
+        const userProfile = await fetchUserProfile(authUser);
+        console.log('refreshUser: Profile fetched, credits:', userProfile.credits);
+        setUser(userProfile);
+        console.log('refreshUser: User state updated');
       } else {
+        console.log('refreshUser: No auth user found');
         setUser(null);
       }
+    } catch (error) {
+      console.error('refreshUser: Error:', error);
+      setUser(null);
+    }
+  };
+
+  useEffect(() => {
+    console.log('UserProvider: Initializing...');
+    
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log('UserProvider: Session check result:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        error: error?.message,
+      });
+      
+      if (session?.user) {
+        console.log('UserProvider: Session found, fetching profile...');
+        fetchUserProfile(session.user).then((profile) => {
+          console.log('UserProvider: Profile loaded, credits:', profile.credits);
+          setUser(profile);
+        });
+      } else {
+        console.log('UserProvider: No session found');
+      }
+      setLoading(false);
+      setIsInitialized(true);
     });
 
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('UserProvider: Auth state changed:', event, {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+        });
+        
+        if (session?.user) {
+          const userProfile = await fetchUserProfile(session.user);
+          console.log('UserProvider: Profile updated, credits:', userProfile.credits);
+          setUser(userProfile);
+        } else {
+          console.log('UserProvider: Session cleared');
+          setUser(null);
+        }
+      }
+    );
+
     return () => {
-      authListener.subscription.unsubscribe();
+      console.log('UserProvider: Cleaning up subscription');
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -66,7 +164,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, logout }}>
+    <UserContext.Provider value={{ user, loading, logout, refreshUser }}>
       {children}
     </UserContext.Provider>
   );

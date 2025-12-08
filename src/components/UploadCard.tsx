@@ -59,9 +59,16 @@ export default function UploadCard() {
 
   const handleInputChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
+      console.log('File input changed');
       const files = e.target.files;
-      if (!files?.length) return;
+      console.log('Files selected:', files?.length || 0);
+      
+      if (!files?.length) {
+        console.log('No files selected');
+        return;
+      }
 
+      console.log('Calling onFilesSelected with', files.length, 'files');
       onFilesSelected(files);
       e.target.value = '';
     },

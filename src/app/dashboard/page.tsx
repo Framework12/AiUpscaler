@@ -88,18 +88,17 @@ const FREE_STORAGE_GB = 1;
 
 export default function Dashboard() {
   const router = useRouter();
-  const { user, logout } = useUser();
+  const { user, loading, logout } = useUser();
   const [activeTab, setActiveTab] = useState<TabType>('Overview');
   const isAuthed = !!user;
 
   useEffect(() => {
-    if (!user) {
-      const timeout = setTimeout(() => {
-        router.replace('/auth/signin');
-      }, 0);
-      return () => clearTimeout(timeout);
+    // Wait for loading to complete before redirecting
+    if (!loading && !user) {
+      console.log('Dashboard: No user found, redirecting to signin');
+      router.replace('/auth/signin');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
   const handleSignOut = useCallback(() => {
     logout();
@@ -135,6 +134,18 @@ export default function Dashboard() {
       creditsSubtext: `of ${FREE_CREDITS} credits`,
     };
   }, [user]);
+
+  // Show loading state while checking session
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+          <p className="text-slate-400">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">

@@ -93,8 +93,9 @@ export default function BeforeAfterSlider({
         ref={containerRef}
         className="relative w-full overflow-hidden rounded-2xl bg-slate-800 cursor-col-resize select-none group"
         onClick={handleClick}
-        style={{ paddingBottom: '66.67%' }} 
+        style={{ paddingBottom: '66.67%' }} // 3:2 aspect ratio
       >
+        {/* Base: Upscaled Sharp Image (shown everywhere) */}
         <img
           src={afterImage}
           alt="Upscaled"
@@ -102,6 +103,7 @@ export default function BeforeAfterSlider({
           draggable={false}
         />
 
+        {/* Overlay: Original Pixelated/Low-Res Image (revealed by slider from left) */}
         <div
           className="absolute inset-0 overflow-hidden transition-all"
           style={{ 
@@ -124,6 +126,7 @@ export default function BeforeAfterSlider({
           />
         </div>
 
+        {/* Slider Handle with Enhanced Design */}
         <div
           className="absolute top-0 bottom-0 w-1 transition-all"
           style={{ 
@@ -139,6 +142,7 @@ export default function BeforeAfterSlider({
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
         >
+          {/* Handle Circle with Icon */}
           <div 
             className="absolute top-1/2 left-1/2 w-16 h-16 rounded-full shadow-2xl border-4 border-white/40 transition-all flex items-center justify-center backdrop-blur-sm"
             style={{ 
@@ -164,6 +168,7 @@ export default function BeforeAfterSlider({
             </div>
           </div>
 
+          {/* Vertical Glow Effect */}
           <div 
             className="absolute inset-y-0 -left-3 -right-3 pointer-events-none transition-all"
             style={{
@@ -172,12 +177,49 @@ export default function BeforeAfterSlider({
                 : 'radial-gradient(ellipse 15px 100% at center, rgba(34, 211, 238, 0.2), transparent)',
               transitionDuration: isDragging ? '0ms' : '150ms'
             }}
-          >
-          </div>
+          ></div>
         </div>
 
-              </div>
-
+        {/* Labels - Only show relevant ones */}
+        <div 
+          className="absolute bottom-6 left-6 bg-gradient-to-r from-slate-950/85 to-slate-900/70 backdrop-blur-md px-4 py-2 rounded-xl border border-cyan-500/40 shadow-lg transition-all duration-300"
+          style={{ opacity: Math.min(1, sliderPosition / 30) }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
+            <span className="text-white text-sm font-bold tracking-wide">{beforeLabel}</span>
           </div>
+          <p className="text-cyan-300/70 text-xs mt-1">low resolution (50%)</p>
+        </div>
+
+        <div 
+          className="absolute bottom-6 right-6 bg-gradient-to-r from-slate-900/70 to-slate-950/85 backdrop-blur-md px-4 py-2 rounded-xl border border-emerald-500/40 shadow-lg transition-all duration-300"
+          style={{ opacity: Math.min(1, (100 - sliderPosition) / 30) }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+            <span className="text-white text-sm font-bold tracking-wide">{afterLabel}</span>
+          </div>
+          <p className="text-emerald-300/70 text-xs mt-1">full resolution (100%)</p>
+        </div>
+
+        {/* Center Progress Indicator */}
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-950/80 backdrop-blur-md px-4 py-2 rounded-full border border-cyan-400/50 shadow-xl transition-all duration-300"
+          style={{
+            opacity: isDragging ? 1 : 0,
+            transform: `translate(-50%, -50%) scale(${isDragging ? 1 : 0.8})`
+          }}
+        >
+          <p className="text-cyan-300 text-sm font-bold">{Math.round(sliderPosition)}% {beforeLabel}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-4 text-center">
+        <p className="text-sm text-slate-400 select-none">← Drag slider to reveal low-res original</p>
+        <span className="text-slate-600">•</span>
+        <p className="text-sm text-slate-400 select-none">Upscaled HD image shown by default →</p>
+      </div>
+    </div>
   );
 }

@@ -2,9 +2,9 @@ export interface UpscaleResponse {
   success: boolean;
   url?: string;
   error?: string;
+  credits?: number;
+  totalUpscales?: number;
 }
-
-import { supabase } from '@/lib/supabaseClient';
 
 export async function upscaleImage(
   imageUrl: string,
@@ -13,7 +13,35 @@ export async function upscaleImage(
 ): Promise<UpscaleResponse> {
   try {
     console.log('Upscaling image with scale:', scale);
-    
+
+    // Step 1: Deduct credits if user is logged in
+    if (userId) {
+      const creditResponse = await fetch('/api/credits/deduct', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, amount: 1 }),
+      });
+
+      const creditData = await creditResponse.json();
+
+      if (!creditResponse.ok) {
+        if (creditResponse.status === 402) {
+          return {
+            success: false,
+            error: 'Insufficient credits. Please upgrade to premium or purchase more credits.',
+            credits: creditData.credits,
+          };
+        }
+        return {
+          success: false,
+          error: creditData.error || 'Failed to process credits',
+        };
+      }
+    }
+
+    // Step 2: Upscale the image
     const response = await fetch('/api/upscale', {
       method: 'POST',
       headers: {
@@ -29,7 +57,7 @@ export async function upscaleImage(
 
     if (!response.ok) {
       console.error('API error response:', data);
-      
+
       // Handle specific status codes
       if (response.status === 401) {
         return {
@@ -37,14 +65,14 @@ export async function upscaleImage(
           error: 'Invalid or expired API key. Please check your Clipboard API configuration.',
         };
       }
-      
+
       if (response.status === 429) {
         return {
           success: false,
           error: 'Rate limit exceeded. Please wait a moment and try again.',
         };
       }
-      
+
       return {
         success: false,
         error: data.error || `API Error: ${response.status}`,
@@ -61,13 +89,23 @@ export async function upscaleImage(
 
     console.log('Upscale successful, URL:', data.url.substring(0, 50) + '...');
 
+    // Step 3: Save image record to database if user is logged in
     if (userId) {
-      await supabase.from('images').insert([{
-        user_id: userId,
-        original_url: imageUrl,
-        upscaled_url: data.url,
-        scale: scale,
-      }]);
+      await fetch('/api/images/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          originalUrl: imageUrl,
+          upscaledUrl: data.url,
+          scale,
+        }),
+      }).catch((err) => {
+        console.error('Failed to save image record:', err);
+        // Don't fail the whole operation if saving fails
+      });
     }
 
     return {

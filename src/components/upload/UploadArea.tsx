@@ -47,7 +47,7 @@ export const UploadArea: React.FC<UploadAreaProps> = ({ isDragging, handleDragEn
         </label>
         <div className="relative z-10 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-500">
           <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /><span>JPG, PNG, WebP</span></div>
-          <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-cyan-400" /><span>Max 10MB</span></div>
+          <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-cyan-400" /><span>Max 10MB per file</span></div>
           <div className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-purple-400" /><span>Up to {maxUploadLimit} images</span></div>
         </div>
       </div>
