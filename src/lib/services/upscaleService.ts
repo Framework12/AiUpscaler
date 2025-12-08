@@ -14,7 +14,6 @@ export async function upscaleImage(
   try {
     console.log('Upscaling image with scale:', scale);
 
-    // Step 1: Deduct credits if user is logged in
     if (userId) {
       const creditResponse = await fetch('/api/credits/deduct', {
         method: 'POST',
@@ -41,7 +40,6 @@ export async function upscaleImage(
       }
     }
 
-    // Step 2: Upscale the image
     const response = await fetch('/api/upscale', {
       method: 'POST',
       headers: {
@@ -58,7 +56,6 @@ export async function upscaleImage(
     if (!response.ok) {
       console.error('API error response:', data);
 
-      // Handle specific status codes
       if (response.status === 401) {
         return {
           success: false,
@@ -89,7 +86,6 @@ export async function upscaleImage(
 
     console.log('Upscale successful, URL:', data.url.substring(0, 50) + '...');
 
-    // Step 3: Save image record to database if user is logged in
     if (userId) {
       await fetch('/api/images/save', {
         method: 'POST',
@@ -104,7 +100,6 @@ export async function upscaleImage(
         }),
       }).catch((err) => {
         console.error('Failed to save image record:', err);
-        // Don't fail the whole operation if saving fails
       });
     }
 

@@ -3,10 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
 
-// Server-side Supabase client with service role for admin operations
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!, // This should be in .env.local (NOT NEXT_PUBLIC_)
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
   {
     auth: {
       autoRefreshToken: false,
@@ -26,7 +25,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get current user profile
     const { data: profile, error: fetchError } = await supabaseAdmin
       .from('profiles')
       .select('credits, is_premium, total_upscales')
@@ -40,7 +38,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Premium users have unlimited credits
     if (profile.is_premium) {
       return NextResponse.json({
         success: true,
@@ -49,7 +46,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Check if user has enough credits
     if (profile.credits < amount) {
       return NextResponse.json(
         { error: 'Insufficient credits', credits: profile.credits },
@@ -57,7 +53,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Deduct credits and increment total_upscales
     const newCredits = profile.credits - amount;
     const newTotalUpscales = (profile.total_upscales || 0) + 1;
 

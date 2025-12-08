@@ -93,17 +93,14 @@ export default function BeforeAfterSlider({
         ref={containerRef}
         className="relative w-full overflow-hidden rounded-2xl bg-slate-800 cursor-col-resize select-none group"
         onClick={handleClick}
-        style={{ paddingBottom: '66.67%' }} // 3:2 aspect ratio
+        style={{ paddingBottom: '66.67%' }}
       >
-        {/* Base: Upscaled Sharp Image (shown everywhere) */}
         <img
           src={afterImage}
           alt="Upscaled"
           className="absolute inset-0 w-full h-full object-cover"
           draggable={false}
         />
-
-        {/* Overlay: Original Pixelated/Low-Res Image (revealed by slider from left) */}
         <div
           className="absolute inset-0 overflow-hidden transition-all"
           style={{ 
@@ -114,7 +111,7 @@ export default function BeforeAfterSlider({
         >
           <img
             src={beforeImage}
-            alt="Original - Low Resolution"
+            alt="Original"
             className="absolute inset-0 w-full h-full object-cover"
             style={{
               imageRendering: 'pixelated',
@@ -125,8 +122,6 @@ export default function BeforeAfterSlider({
             draggable={false}
           />
         </div>
-
-        {/* Slider Handle with Enhanced Design */}
         <div
           className="absolute top-0 bottom-0 w-1 transition-all"
           style={{ 
@@ -142,7 +137,6 @@ export default function BeforeAfterSlider({
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
         >
-          {/* Handle Circle with Icon */}
           <div 
             className="absolute top-1/2 left-1/2 w-16 h-16 rounded-full shadow-2xl border-4 border-white/40 transition-all flex items-center justify-center backdrop-blur-sm"
             style={{ 
@@ -167,8 +161,6 @@ export default function BeforeAfterSlider({
               </svg>
             </div>
           </div>
-
-          {/* Vertical Glow Effect */}
           <div 
             className="absolute inset-y-0 -left-3 -right-3 pointer-events-none transition-all"
             style={{
@@ -179,8 +171,6 @@ export default function BeforeAfterSlider({
             }}
           ></div>
         </div>
-
-        {/* Labels - Only show relevant ones */}
         <div 
           className="absolute bottom-6 left-6 bg-gradient-to-r from-slate-950/85 to-slate-900/70 backdrop-blur-md px-4 py-2 rounded-xl border border-cyan-500/40 shadow-lg transition-all duration-300"
           style={{ opacity: Math.min(1, sliderPosition / 30) }}
@@ -202,8 +192,6 @@ export default function BeforeAfterSlider({
           </div>
           <p className="text-emerald-300/70 text-xs mt-1">full resolution (100%)</p>
         </div>
-
-        {/* Center Progress Indicator */}
         <div 
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-950/80 backdrop-blur-md px-4 py-2 rounded-full border border-cyan-400/50 shadow-xl transition-all duration-300"
           style={{

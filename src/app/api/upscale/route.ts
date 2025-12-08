@@ -28,8 +28,6 @@ function isValidHttpUrl(url: string): boolean {
   }
 }
 
-// --- Route handler --- //
-
 export async function POST(request: NextRequest) {
   try {
     const apiKey = process.env.CLIPBOARD_API_KEY;
@@ -61,7 +59,6 @@ export async function POST(request: NextRequest) {
       return jsonError('Invalid image URL format', 400);
     }
 
-    // Normalize scale
     const numericScale = Number(scale) || 2;
     const safeScale = Math.min(Math.max(numericScale, MIN_SCALE), MAX_SCALE);
 
@@ -74,7 +71,6 @@ export async function POST(request: NextRequest) {
 
     let imageBlob: Blob;
 
-    // Data URL (base64) vs remote URL
     if (isDataUrl(imageUrl)) {
       const parts = imageUrl.split(',');
       const base64Data = parts[1];
@@ -87,7 +83,7 @@ export async function POST(request: NextRequest) {
       imageBlob = new Blob([buffer]);
     } else {
       const abortController = new AbortController();
-      const timeoutId = setTimeout(() => abortController.abort(), 15_000); // 15s timeout
+      const timeoutId = setTimeout(() => abortController.abort(), 15_000);
 
       const imageResponse = await fetch(imageUrl, {
         signal: abortController.signal,
@@ -112,7 +108,6 @@ export async function POST(request: NextRequest) {
       imageBlob = new Blob([imageBuffer]);
     }
 
-
     const targetSize = BASE_SIZE * safeScale;
 
     const formData = new FormData();
@@ -120,7 +115,6 @@ export async function POST(request: NextRequest) {
     formData.append('target_width', String(targetSize));
     formData.append('target_height', String(targetSize));
 
-    // Call Clipdrop API
     const clipdropResponse = await fetch(CLIPDROP_URL, {
       method: 'POST',
       headers: {

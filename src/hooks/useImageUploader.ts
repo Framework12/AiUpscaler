@@ -37,46 +37,32 @@ export const useImageUploader = () => {
   const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
   const handleFilesSelect = useCallback((files: File[]) => {
-    console.log('handleFilesSelect called with files:', files.length);
-    
     const imageFiles = files.filter(file => {
-      console.log('Checking file:', file.name, file.type, file.size);
-      
       if (!file.type.startsWith('image/')) {
-        console.log('File rejected: not an image');
         return false;
       }
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        console.log('File rejected: too large');
         setState(prev => ({ ...prev, error: `Image "${file.name}" is too large. Please upload files smaller than ${MAX_FILE_SIZE_MB}MB.` }));
         return false;
       }
-      console.log('File accepted:', file.name);
       return true;
     });
 
-    console.log('Image files after filtering:', imageFiles.length);
-
     if (imageFiles.length === 0) {
-      console.log('No valid image files');
       return;
     }
 
     const currentCount = state.images.length;
     const remainingSlots = maxUploadLimit - currentCount;
-    console.log('Current images:', currentCount, 'Remaining slots:', remainingSlots);
     
     if (imageFiles.length > remainingSlots) {
       setState(prev => ({ ...prev, error: `You can only upload ${remainingSlots} more images.` }));
       return;
     }
-
-    console.log('Processing', imageFiles.length, 'files...');
     
     imageFiles.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        console.log('File read complete:', file.name);
         const newImage: ImageItem = {
           id: `${Date.now()}-${Math.random()}`,
           file,
@@ -85,15 +71,8 @@ export const useImageUploader = () => {
           isLoading: false,
           error: null,
         };
-        setState(prev => {
-          console.log('Adding image to state, current count:', prev.images.length);
-          return { ...prev, images: [...prev.images, newImage], error: null };
-        });
+        setState(prev => ({ ...prev, images: [...prev.images, newImage], error: null }));
       };
-      reader.onerror = (error) => {
-        console.error('FileReader error:', error);
-      };
-      console.log('Starting to read file:', file.name);
       reader.readAsDataURL(file);
     });
   }, [state.images.length, maxUploadLimit, MAX_FILE_SIZE_BYTES, MAX_FILE_SIZE_MB]);
@@ -135,9 +114,7 @@ export const useImageUploader = () => {
 
         // Refresh user data from database to get updated credits
         if (user) {
-          console.log('Refreshing user data to get updated credits...');
           await refreshUser();
-          console.log('User data refreshed');
         }
 
         // Track anonymous upscales

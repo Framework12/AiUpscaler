@@ -85,7 +85,6 @@ const HowItWorks: FC = () => {
           {STEPS.map((step, idx) => (
             <article key={step.number} className="relative h-full">
               <div className="flex h-full flex-col rounded-2xl border border-slate-700 bg-slate-900/70 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:border-cyan-400/60 hover:shadow-xl hover:shadow-cyan-500/20">
-                {/* Icon & number row */}
                 <div className="mb-6 flex items-center justify-between">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 text-2xl shadow-md ring-1 ring-slate-700">
                     <span aria-hidden="true">{step.icon}</span>
@@ -102,8 +101,6 @@ const HowItWorks: FC = () => {
                   {step.description}
                 </p>
               </div>
-
-              {/* Connector arrow on desktop */}
               {idx < STEPS.length - 1 && (
                 <div className="pointer-events-none absolute inset-y-0 right-[-18px] hidden md:flex items-center">
                   <svg

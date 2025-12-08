@@ -95,7 +95,6 @@ export default function Dashboard() {
   useEffect(() => {
     // Wait for loading to complete before redirecting
     if (!loading && !user) {
-      console.log('Dashboard: No user found, redirecting to signin');
       router.replace('/auth/signin');
     }
   }, [user, loading, router]);

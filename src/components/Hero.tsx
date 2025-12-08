@@ -16,7 +16,6 @@ export default function Hero() {
     <section className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 px-4 pb-20 pt-28 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="grid items-center gap-12 md:grid-cols-2">
-      
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/40 bg-slate-900/70 px-3 py-1 text-xs font-medium text-purple-200 shadow-sm backdrop-blur">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -108,7 +107,6 @@ export default function Hero() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </div>
-         
                 <div className="relative z-10 flex items-center justify-between border-t border-slate-700/70 bg-slate-900/90 px-3 py-2 text-[11px] text-slate-300 backdrop-blur-sm">
                   <span className="truncate font-medium">{item.label}</span>
                   <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">
@@ -216,14 +214,13 @@ function BeforeAfterPreview() {
       <div className="absolute inset-0 overflow-hidden">
         <Image
           src="/assets/after.jpg"
-          alt="After upscaling - enhanced high resolution"
+          alt="After upscaling"
           className="h-full w-full object-cover"
           draggable={false}
           fill
           sizes="(min-width: 768px) 50vw, 100vw"
         />
       </div>
-
       <div
         className="absolute inset-0 overflow-hidden"
         style={{
@@ -235,14 +232,13 @@ function BeforeAfterPreview() {
       >
         <Image
           src="/assets/before.jpg"
-          alt="Before upscaling - original low resolution"
+          alt="Before upscaling"
           className="h-full w-full object-cover"
           draggable={false}
           fill
           sizes="(min-width: 768px) 50vw, 100vw"
         />
       </div>
-
       <div
         role="slider"
         tabIndex={0}

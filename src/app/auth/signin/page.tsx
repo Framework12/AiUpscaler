@@ -18,7 +18,6 @@ export default function SignIn() {
     setError('');
     setIsLoading(true);
 
-    // Validation
     if (!email || !password) {
       setError('Please fill in all fields');
       setIsLoading(false);
@@ -50,7 +49,6 @@ export default function SignIn() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-2 mb-6">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-lg flex items-center justify-center">
@@ -61,10 +59,7 @@ export default function SignIn() {
           <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
           <p className="text-slate-400">Sign in to your account to continue</p>
         </div>
-
-        {/* Form Card */}
         <div className="bg-slate-800/50 backdrop-blur rounded-2xl shadow-xl p-8 border border-slate-700">
-          {/* Error Message */}
           {error && (
             <div className="mb-6 p-4 bg-red-950/50 border border-red-800 rounded-lg flex items-start space-x-3">
               <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -79,7 +74,6 @@ export default function SignIn() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-white mb-2">
                 Email Address
@@ -93,8 +87,6 @@ export default function SignIn() {
                 className="w-full px-4 py-3 border border-slate-600 bg-slate-900/50 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition placeholder-slate-500"
               />
             </div>
-
-            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-white mb-2">
                 Password
@@ -134,8 +126,6 @@ export default function SignIn() {
                 </button>
               </div>
             </div>
-
-            {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between">
               <label className="flex items-center space-x-2 cursor-pointer">
                 <input
@@ -148,8 +138,6 @@ export default function SignIn() {
                 Forgot password?
               </Link>
             </div>
-
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
@@ -159,8 +147,6 @@ export default function SignIn() {
             </button>
           </form>
         </div>
-
-        {/* Sign Up Link */}
         <p className="mt-8 text-center text-slate-400">
           Don't have an account?{' '}
           <Link href="/auth/signup" className="font-semibold text-cyan-400 hover:text-cyan-300 transition">

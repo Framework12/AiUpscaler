@@ -37,15 +37,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
-        console.error('Error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-        });
-        
-        // Return a default user object if profile doesn't exist yet
         return {
           id: authUser.id,
           email: authUser.email,
@@ -67,9 +58,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         totalUpscales: profile?.total_upscales ?? 0,
       };
     } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
-      
-      // Return a default user object on error
       return {
         id: authUser.id,
         email: authUser.email,
@@ -84,78 +72,45 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshUser = async () => {
     try {
-      console.log('refreshUser: Starting...');
       const { data: { user: authUser }, error } = await supabase.auth.getUser();
       
       if (error) {
-        console.error('refreshUser: Error getting user:', error);
         setUser(null);
         return;
       }
       
       if (authUser) {
-        console.log('refreshUser: Auth user found, fetching profile...');
         const userProfile = await fetchUserProfile(authUser);
-        console.log('refreshUser: Profile fetched, credits:', userProfile.credits);
         setUser(userProfile);
-        console.log('refreshUser: User state updated');
       } else {
-        console.log('refreshUser: No auth user found');
         setUser(null);
       }
     } catch (error) {
-      console.error('refreshUser: Error:', error);
       setUser(null);
     }
   };
 
   useEffect(() => {
-    console.log('UserProvider: Initializing...');
-    
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('UserProvider: Session check result:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        error: error?.message,
-      });
-      
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        console.log('UserProvider: Session found, fetching profile...');
-        fetchUserProfile(session.user).then((profile) => {
-          console.log('UserProvider: Profile loaded, credits:', profile.credits);
-          setUser(profile);
-        });
-      } else {
-        console.log('UserProvider: No session found');
+        fetchUserProfile(session.user).then(setUser);
       }
       setLoading(false);
       setIsInitialized(true);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('UserProvider: Auth state changed:', event, {
-          hasSession: !!session,
-          hasUser: !!session?.user,
-        });
-        
+      async (_event, session) => {
         if (session?.user) {
           const userProfile = await fetchUserProfile(session.user);
-          console.log('UserProvider: Profile updated, credits:', userProfile.credits);
           setUser(userProfile);
         } else {
-          console.log('UserProvider: Session cleared');
           setUser(null);
         }
       }
     );
 
-    return () => {
-      console.log('UserProvider: Cleaning up subscription');
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const logout = async () => {

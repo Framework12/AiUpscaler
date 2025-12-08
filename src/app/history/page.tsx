@@ -23,7 +23,6 @@ export default function HistoryPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Redirect to signin if not authenticated
     if (!loading && !user) {
       router.push('/auth/signin');
       return;
@@ -71,12 +70,11 @@ export default function HistoryPage() {
   }
 
   if (!user) {
-    return null; // Will redirect
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
-      {/* Header */}
       <header className="border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
@@ -96,8 +94,6 @@ export default function HistoryPage() {
           </div>
         </div>
       </header>
-
-      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {error ? (
           <div className="bg-red-950/50 border border-red-800 rounded-lg p-6 text-center">

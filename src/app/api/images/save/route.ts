@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save image record to database
     const { data: image, error } = await supabaseAdmin
       .from('images')
       .insert({
